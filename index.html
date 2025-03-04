@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Color Prediction Platform</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: #f0f2f5;
+            min-height: 100vh;
+            user-select: none;
+        }
+        .prediction-card {
+            transition: all 0.3s ease;
+        }
+        .prediction-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-radius: 50%;
+            border-top: 4px solid #3498db;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+            display: none;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-purple-50">
+    <!-- Login Section -->
+    <div id="loginSection" class="min-h-screen flex items-center justify-center p-4">
+        <div class="glass-effect p-8 rounded-2xl shadow-xl max-w-md w-full">
+            <div class="text-center mb-8">
+                <h2 class="text-3xl font-bold text-gray-800">Color Prediction</h2>
+                <p class="text-gray-600">Enter your credentials to continue</p>
+            </div>
+            <form id="loginForm" class="space-y-6">
+                <div>
+                    <label class="text-sm font-medium text-gray-700" for="username">Username</label>
+                    <input type="text" id="username" class="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
+                </div>
+                <div>
+                    <label class="text-sm font-medium text-gray-700" for="password">Password</label>
+                    <input type="password" id="password" class="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
+                </div>
+                <button type="submit" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-300">
+                    Login
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- User Dashboard -->
+    <div id="userDashboard" class="hidden min-h-screen bg-gradient-to-br from-blue-50 to-purple-50">
+        <nav class="glass-effect shadow-md">
+            <div class="max-w-7xl mx-auto px-4">
+                <div class="flex justify-between h-16">
+                    <div class="flex items-center">
+                        <h1 class="text-xl font-bold text-gray-800">Predictions</h1>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <span id="userBalance" class="text-gray-700 font-medium">Balance: ₹1000</span>
+                        <button id="userLogoutBtn" class="px-4 py-2 text-sm text-white bg-red-500 rounded-lg hover:bg-red-600 transition-colors duration-300">
+                            Logout
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <main class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+            <div id="predictionContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Predictions will be dynamically inserted here -->
+            </div>
+            <div class="loader" id="loader"></div>
+        </main>
+    </div>
+
+    <!-- Admin/Owner Panel -->
+    <div id="adminPanel" class="hidden min-h-screen bg-gradient-to-br from-blue-50 to-purple-50">
+        <nav class="glass-effect shadow-md">
+            <div class="max-w-7xl mx-auto px-4">
+                <div class="flex justify-between h-16">
+                    <div class="flex items-center">
+                        <h1 class="text-xl font-bold text-gray-800">Admin Panel</h1>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <button id="createUserBtn" class="px-4 py-2 text-sm text-white bg-green-500 rounded-lg hover:bg-green-600 transition-colors duration-300">
+                            Create User
+                        </button>
+                        <button id="adminLogoutBtn" class="px-4 py-2 text-sm text-white bg-red-500 rounded-lg hover:bg-red-600 transition-colors duration-300">
+                            Logout
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <main class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+            <div class="glass-effect rounded-2xl p-6 mb-6">
+                <h2 class="text-lg font-medium mb-4">Add New Prediction</h2>
+                <form id="predictionForm" class="space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Color</label>
+                            <input type="color" id="predictionColor" class="mt-1 block w-full h-12 rounded-lg" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Number</label>
+                            <input type="number" id="predictionNumber" min="0" max="9" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg" required>
+                        </div>
+                    </div>
+                    <button type="submit" class="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-4 py-3 rounded-lg transition-all duration-300">
+                        Add Prediction
+                    </button>
+                </form>
+            </div>
+
+            <div class="glass-effect rounded-2xl p-6">
+                <h2 class="text-lg font-medium mb-4">Create New User</h2>
+                <form id="createUserForm" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Username</label>
+                        <input type="text" id="newUsername" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Password</label>
+                        <input type="text" id="newPassword" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg" required>
+                    </div>
+                    <button type="submit" class="w-full bg-green-500 hover:bg-green-600 text-white px-4 py-3 rounded-lg transition-colors duration-300">
+                        Create User
+                    </button>
+                </form>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Mock database
+        let users = [
+            { username: 'admin', password: 'admin123', role: 'admin' },
+            { username: 'owner', password: 'owner123', role: 'owner' }
+        ];
+
+        let predictions = [];
+        let currentUser = null;
+
+        // DOM Elements
+        const loginForm = document.getElementById('loginForm');
+        const createUserForm = document.getElementById('createUserForm');
+        const predictionForm = document.getElementById('predictionForm');
+        const sections = {
+            login: document.getElementById('loginSection'),
+            user: document.getElementById('userDashboard'),
+            admin: document.getElementById('adminPanel')
+        };
+
+        // Login Handler
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            const user = users.find(u => u.username === username && u.password === password);
+            
+            if (user) {
+                currentUser = user;
+                sections.login.classList.add('hidden');
+                if (['admin', 'owner'].includes(user.role)) {
+                    sections.admin.classList.remove('hidden');
+                } else {
+                    sections.user.classList.remove('hidden');
+                    updatePredictions();
+                }
+            } else {
+                alert('Invalid credentials');
+            }
+        });
+
+        // Create User Handler
+        createUserForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const username = document.getElementById('newUsername').value;
+            const password = document.getElementById('newPassword').value;
+
+            if (users.some(u => u.username === username)) {
+                alert('Username already exists!');
+                return;
+            }
+
+            users.push({
+                username,
+                password,
+                role: 'user'
+            });
+
+            alert('User created successfully!');
+            createUserForm.reset();
+        });
+
+        // Prediction Form Handler
+        predictionForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const color = document.getElementById('predictionColor').value;
+            const number = document.getElementById('predictionNumber').value;
+
+            if (number < 0 || number > 9) {
+                alert('Number must be between 0 and 9');
+                return;
+            }
+
+            predictions.unshift({
+                color,
+                number,
+                timestamp: new Date().toISOString()
+            });
+
+            updatePredictions();
+            predictionForm.reset();
+            alert('Prediction added successfully!');
+        });
+
+        // Logout Handlers
+        ['userLogoutBtn', 'adminLogoutBtn'].forEach(id => {
+            document.getElementById(id)?.addEventListener('click', () => {
+                currentUser = null;
+                Object.values(sections).forEach(section => {
+                    if (section !== sections.login) {
+                        section.classList.add('hidden');
+                    }
+                });
+                sections.login.classList.remove('hidden');
+            });
+        });
+
+        // Update Predictions Display
+        function updatePredictions() {
+            const container = document.getElementById('predictionContainer');
+            const loader = document.getElementById('loader');
+            
+            loader.style.display = 'block';
+
+            setTimeout(() => {
+                container.innerHTML = predictions.map(prediction => `
+                    <div class="prediction-card glass-effect p-6 rounded-xl">
+                        <div class="flex items-center space-x-4">
+                            <div class="w-16 h-16 rounded-xl shadow-inner" style="background-color: ${prediction.color}"></div>
+                            <div>
+                                <p class="text-2xl font-bold">${prediction.number}</p>
+                                <p class="text-sm text-gray-500">${new Date(prediction.timestamp).toLocaleString()}</p>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+                
+                loader.style.display = 'none';
+            }, 1000);
+        }
+
+        // Initialize with sample prediction
+        predictions.push({
+            color: '#4CAF50',
+            number: 7,
+            timestamp: new Date().toISOString()
+        });
+    </script>
+<script>document.body.addEventListener('wheel', e => { if (!e.ctrlKey) return; e.preventDefault(); return }, { passive: false })</script>
+	</body>
+</html>
